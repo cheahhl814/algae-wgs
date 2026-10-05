@@ -31,14 +31,20 @@ from pathlib import Path
 
 
 def find_skill_root(start: Path) -> Path | None:
-    """Walk up from `start` until we find a directory containing SKILL.md and .git/.
-    Also tries Path.cwd() — the user typically runs `pixi run update-check` from
-    the skill root, so cwd may be a faster path than the script location (which
-    could live anywhere if the script was symlinked or vendored)."""
+    """Walk up from `start` until we find a repo root.
+    Monorepo adaptation (documented deviation): the repo root may have no
+    SKILL.md of its own — it is enough to hold .git/ plus either SKILL.md
+    (per-skill layout) or pixi.toml (monorepo layout; version comes from the
+    [workspace] table). Also tries Path.cwd() — the user typically runs
+    `pixi run update-check` from the skill root, so cwd may be a faster path
+    than the script location (which could live anywhere if the script was
+    symlinked or vendored)."""
     for start_path in {start, Path.cwd()}:
         cur = start_path.resolve()
         for p in [cur, *cur.parents]:
-            if (p / "SKILL.md").is_file() and (p / ".git").exists():
+            if (p / ".git").exists() and (
+                (p / "SKILL.md").is_file() or (p / "pixi.toml").is_file()
+            ):
                 return p
             if p == p.parent:
                 break
@@ -62,6 +68,25 @@ def parse_version(skill_md: Path) -> str | None:
     return m.group(1).strip() if m else None
 
 
+def parse_workspace_version(pixi_toml: Path) -> str | None:
+    """Version from a pixi manifest's [workspace] table (monorepo layout)."""
+    m = re.search(r'^version\s*=\s*"([^"]+)"', pixi_toml.read_text(encoding="utf-8", errors="replace"), re.MULTILINE)
+    return m.group(1).strip() if m else None
+
+
+def version_of(skill_root: Path) -> str | None:
+    """SKILL.md frontmatter version when present, else pixi.toml [workspace]."""
+    skill_md = skill_root / "SKILL.md"
+    if skill_md.is_file():
+        v = parse_version(skill_md)
+        if v:
+            return v
+    pixi_toml = skill_root / "pixi.toml"
+    if pixi_toml.is_file():
+        return parse_workspace_version(pixi_toml)
+    return None
+
+
 def upstream_skill_md(skill_root: Path, origin_ref: str) -> Path | None:
     """The fetched upstream's SKILL.md (e.g. fetched via `git fetch`). Lives in .git, not on disk normally.
 
@@ -70,11 +95,12 @@ def upstream_skill_md(skill_root: Path, origin_ref: str) -> Path | None:
     `gh clone` and shallow checkouts leave origin/HEAD unset.
     """
     for ref in ("origin/HEAD", origin_ref):
-        rc, out, _ = git("show", f"{ref}:SKILL.md", cwd=skill_root)
-        if rc == 0 and out:
-            tmp = skill_root / ".git" / "update-check-upstream-SKILL.md"
-            tmp.write_text(out, encoding="utf-8")
-            return tmp
+        for fname in ("SKILL.md", "pixi.toml"):
+            rc, out, _ = git("show", f"{ref}:{fname}", cwd=skill_root)
+            if rc == 0 and out:
+                tmp = skill_root / ".git" / "update-check-upstream-SKILL.md"
+                tmp.write_text(out, encoding="utf-8")
+                return tmp
     return None
 
 
@@ -103,7 +129,7 @@ def main() -> int:
         print(f"OFFLINE: git fetch origin failed ({err.splitlines()[0] if err else 'unknown'})")
         print(f"  remote:    {remote_url}")
         print(f"  local_sha: {local_sha[:12]}")
-        print(f"  deployed:  v{parse_version(skill_root / 'SKILL.md') or '?'}")
+        print(f"  deployed:  v{version_of(skill_root) or '?'}")
         return 2
 
     # Resolve origin/HEAD (falls back to origin/master for repos without symbolic HEAD).
@@ -124,10 +150,15 @@ def main() -> int:
     ahead_n = int(ahead or 0)
     behind_n = int(behind or 0)
 
-    local_version = parse_version(skill_root / "SKILL.md")
+    local_version = version_of(skill_root)
     upstream_md = upstream_skill_md(skill_root, origin_ref)
-    upstream_version = parse_version(upstream_md) if upstream_md else None
+    upstream_version = None
     if upstream_md:
+        upstream_version = (
+            parse_version(upstream_md)
+            if upstream_md.name == "SKILL.md"
+            else parse_workspace_version(upstream_md)
+        )
         upstream_md.unlink(missing_ok=True)
 
     print(f"remote:           {remote_url}")
