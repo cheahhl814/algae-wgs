@@ -1,0 +1,41 @@
+[workspace]
+name = "algal-wgs-course"
+version = "1.0.0"
+description = "Freshwater green-algae WGS course — Samantha On (pixi-locked tool environments)"
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64"]
+
+# Default environment: everything that co-solves (QC, capture, BLAST,
+# k-mer counting, Kraken2, mini- and full SPAdes). Clashing tools get
+# their own feature/environment below — one manifest, one lockfile.
+
+[dependencies]
+fastp = "*"
+sequali = "*"
+multiqc = "*"
+seqkit = "*"
+bbmap = "*"
+blast = "*"
+kraken2 = "*"
+meryl = "*"
+spades = "*"
+
+[feature.genomescope.dependencies]
+genomescope2 = "*"
+
+[feature.quast.dependencies]
+quast = "*"
+
+# NOTE: busco pins a narrow python/pyhmmer stack — that is why it is
+# isolated with no-default-feature, not because of taste.
+[feature.busco.dependencies]
+busco = "5.7.*"
+
+[environments]
+genomescope = { features = ["genomescope"], no-default-feature = false }
+quast = { features = ["quast"], no-default-feature = false }
+busco = { features = ["busco"], no-default-feature = true }
+
+[tasks]
+# Self-check: compares this repo's git SHA to its origin (the private upstream).
+update-check = "python3 bin/skill-update-check.py"

@@ -1,0 +1,51 @@
+{
+  "skill_name": "algae-wgs",
+  "skill_title": "Freshwater green-algae whole-genome sequencing (learn-by-doing, 7 lesson skills)",
+  "skill_description": "Converts the algal-wgs-course (rev 3, 2026-09-29) into the AiX-BIO convention: one private shared GitHub repo containing seven per-lesson skills (L01 setup+md5 intake, L02 read QC+trimming, L03 Kraken2 screen, L04 GenomeScope2 sizing, L05 marker-gene ID, L06 SPAdes assembly, L07 QUAST/BUSCO assembly QC). Run dir deliberately outside @skills/ — built for student (Samantha) use in herdr tutorial mode.",
+  "skill_version": "1.0.0",
+  "skill_updated": "2026-10-05",
+  "skill_triggers": ["algae", "green-algae", "WGS", "genome assembly", "kraken2", "genomescope", "spades", "quast", "busco", "read QC", "bioinformatics lesson"],
+  "run_dir": "/home/cheahhl814/claude_workspace/students/Samantha_On_not_my_student/algae-wgs",
+  "skills_root": "OVERRIDDEN — user: do NOT install to or symlink into ~/.agents/skills/ or ~/.pi/agent/skills/; skills live in run_dir for student use",
+  "github_org": "cheahhl814",
+  "github_repo": "github.com/cheahhl814/algae-wgs (PRIVATE — user override of one-repo-per-skill convention; all 7 lesson skills share this one repo)",
+  "skill_shape": "multi-tool-pipeline",
+  "sub_skills": [
+    "l01-setup-data-intake",
+    "l02-read-qc",
+    "l03-kraken2-screen",
+    "l04-genomescope",
+    "l05-marker-genes",
+    "l06-assembly",
+    "l07-assembly-qc"
+  ],
+  "tool_inventory": [
+    {"name": "fastp", "version": "*", "role": "trimmer", "lesson": "l02-read-qc", "status": "found"},
+    {"name": "sequali", "version": "*", "role": "read-qc", "lesson": "l02-read-qc", "status": "found"},
+    {"name": "multiqc", "version": "*", "role": "report-aggregator", "lesson": "l02-read-qc,l07-assembly-qc", "status": "found"},
+    {"name": "seqkit", "version": "*", "role": "sequence-utils", "lesson": "l03-kraken2-screen,l04-genomescope", "status": "found"},
+    {"name": "bbmap", "version": "*", "role": "adapter-contaminant-trimmer (BBDuk)", "lesson": "l02-read-qc", "status": "found"},
+    {"name": "blast", "version": "*", "role": "marker-gene-id (blastn)", "lesson": "l05-marker-genes", "status": "found"},
+    {"name": "kraken2", "version": "*", "role": "taxonomic-screen", "lesson": "l03-kraken2-screen", "status": "found"},
+    {"name": "meryl", "version": "*", "role": "kmer-counter", "lesson": "l04-genomescope", "status": "found"},
+    {"name": "genomescope2", "version": "*", "role": "genome-size-est", "lesson": "l04-genomescope", "status": "found"},
+    {"name": "spades", "version": "*", "role": "assembler", "lesson": "l06-assembly", "status": "found"},
+    {"name": "quast", "version": "*", "role": "assembly-qc", "lesson": "l07-assembly-qc", "status": "found"},
+    {"name": "busco", "version": "5.7.*", "role": "completeness-qc", "lesson": "l07-assembly-qc", "status": "found"}
+  ],
+  "pixi_available": true,
+  "git_initialized": false,
+  "disk_gb_free": 93,
+  "target_tiers": ["large"],
+  "input_formats": ["fastq", "fasta"],
+  "with_nextflow_runner": false,
+  "nextflow_runner": null,
+  "verdict": "GO",
+  "warnings": [
+    "Convention override (user-directed): skills live in run_dir, NOT installed/symlinked into ~agents/skills/ — bin/skill-update-check.py's rsync path will point at the private repo clone instead",
+    "Convention override (user-directed): 7 lesson skills share ONE private GitHub repo (cheahhl814/algae-wgs) instead of one-repo-per-skill — battle-test check #6 git hygiene adapted accordingly",
+    "Nextflow runner auto-dropped at SP7: the course deliberately deleted its lesson-08 workflow-engine module 2026-09-29; bash recipes only",
+    "Corpus and signature library inherited from the course are authored-not-executed (no pixi.lock, no battle-test-report.md yet) — battle-test of the skill tree remains mandatory before first student session"
+  ],
+  "generated": "2026-10-05T20:50:00+08:00"
+}

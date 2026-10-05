@@ -1,0 +1,56 @@
+{
+  "schema": "herdr-lab/steps.v1",
+  "lesson_id": "02-read-qc",
+  "steps": [
+    {
+      "id": "s1-raw-qc",
+      "instruction": "Raw QC on strainA: `pixi run sequali -t 8 data/raw/strainA_R1.fq.gz data/raw/strainA_R2.fq.gz -o sequali_raw results/strainA/qc_raw/strainA.html`",
+      "accept": [
+        "pixi run sequali -t 8 data/raw/strainA_R1.fq.gz data/raw/strainA_R2.fq.gz -o sequali_raw results/strainA/qc_raw/strainA.html"
+      ],
+      "output_fragment": ["sequali", "Wrote report"],
+      "recorded": "rehearsal/s1-raw-qc.txt",
+      "note": "Checkpoint is reading the HTML (Q30 %, adapter signal) - the agent discusses the recorded report, the student answers in chat."
+    },
+    {
+      "id": "s2-trim-strainA",
+      "instruction": "Trim strainA: `pixi run fastp -i data/raw/strainA_R1.fq.gz -I data/raw/strainA_R2.fq.gz -o results/strainA/trimmed/strainA_R1.trimmed.fq.gz -O results/strainA/trimmed/strainA_R2.trimmed.fq.gz --qualified_quality_phred 20 --length_required 50 --detect_adapter_for_pe --thread 8 --html results/strainA/qc/fastp.strainA.html --json results/strainA/qc/fastp.strainA.json`",
+      "accept": [
+        "pixi run fastp -i data/raw/strainA_R1.fq.gz -I data/raw/strainA_R2.fq.gz -o results/strainA/trimmed/strainA_R1.trimmed.fq.gz -O results/strainA/trimmed/strainA_R2.trimmed.fq.gz --qualified_quality_phred 20 --length_required 50 --detect_adapter_for_pe --thread 8 --html results/strainA/qc/fastp.strainA.html --json results/strainA/qc/fastp.strainA.json",
+        "pixi run fastp -i data/raw/strainA_R1.fq.gz -I data/raw/strainA_R2.fq.gz --qualified_quality_phred 20 --length_required 50 --detect_adapter_for_pe --thread 8 --html results/strainA/qc/fastp.strainA.html --json results/strainA/qc/fastp.strainA.json -o results/strainA/trimmed/strainA_R1.trimmed.fq.gz -O results/strainA/trimmed/strainA_R2.trimmed.fq.gz"
+      ],
+      "output_fragment": ["After filtering", "detect_adapter"],
+      "recorded": "rehearsal/s2-trim-strainA.txt",
+      "note": "Second accept form is genuine fastp flexibility (output flags may trail the report flags); the checkpoint - how many reads survived - comes from the fastp HTML, not the buffer."
+    },
+    {
+      "id": "s3-reqc-trimmed",
+      "instruction": "Re-QC the trimmed reads (same as step 1, changed inputs): `pixi run sequali -t 8 results/strainA/trimmed/strainA_R1.trimmed.fq.gz results/strainA/trimmed/strainA_R2.trimmed.fq.gz -o sequali_trimmed results/strainA/qc_trimmed/strainA.html`",
+      "accept": [
+        "pixi run sequali -t 8 results/strainA/trimmed/strainA_R1.trimmed.fq.gz results/strainA/trimmed/strainA_R2.trimmed.fq.gz -o sequali_trimmed results/strainA/qc_trimmed/strainA.html"
+      ],
+      "output_fragment": ["sequali", "Wrote report"],
+      "recorded": "rehearsal/s3-reqc-trimmed.txt"
+    },
+    {
+      "id": "s4-raph-troubleshoot",
+      "instruction": "Raph troubleshooting (no trimming yet): `pixi run sequali -t 8 data/raw/Raph_R1.fq.gz data/raw/Raph_R2.fq.gz -o sequali_raw results/Raph/qc_raw/Raph.html`",
+      "accept": [
+        "pixi run sequali -t 8 data/raw/Raph_R1.fq.gz data/raw/Raph_R2.fq.gz -o sequali_raw results/Raph/qc_raw/Raph.html"
+      ],
+      "output_fragment": ["sequali"],
+      "silent": false,
+      "note": "A CRASH IS THE EXPECTED OUTCOME for the Raph drill (Windows/WSL I/O fault reproducibility test). An error here routes to the discussion branch - 'the Linux-native rerun is the decisive test' - never to the generic error branch."
+    },
+    {
+      "id": "s5-multiqc",
+      "instruction": "Aggregate everything so far: `pixi run multiqc results/ --force -o results/multiqc`",
+      "accept": [
+        "pixi run multiqc results/ --force -o results/multiqc",
+        "pixi run multiqc results/ -f -o results/multiqc"
+      ],
+      "output_fragment": ["Analysis"],
+      "recorded": "rehearsal/s5-multiqc.txt"
+    }
+  ]
+}

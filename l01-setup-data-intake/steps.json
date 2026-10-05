@@ -1,0 +1,47 @@
+{
+  "schema": "herdr-lab/steps.v1",
+  "lesson_id": "01-setup-and-data-intake",
+  "shell_override": null,
+  "steps": [
+    {
+      "id": "s1-verify-workspace",
+      "instruction": "Verify the workspace: `cd ~/algal-wgs && pixi install --locked && pixi install --locked --offline`",
+      "accept": [
+        "cd ~/algal-wgs && pixi install --locked && pixi install --locked --offline"
+      ],
+      "output_fragment": ["cached packages have changed", "Environment"],
+      "silent": false,
+      "note": "Offline re-install passing proves the cache is complete - that is the checkpoint the agent must discuss, not just 'it worked'."
+    },
+    {
+      "id": "s3-project-skeleton",
+      "instruction": "Create the project skeleton: `mkdir -p data/raw logs && mkdir -p results/{strainA,strainB,strainC,strainD,strainE,strainF}/{qc,kraken2,genomescope,markers,assembly}` (replace strain names with the real six)",
+      "accept": [
+        "mkdir -p data/raw logs && mkdir -p results/{strainA,strainB,strainC,strainD,strainE,strainF}/{qc,kraken2,genomescope,markers,assembly}"
+      ],
+      "output_fragment": [],
+      "silent": true,
+      "note": "Silent by design - gate on buffer growth, then require the follow-up 'ls results' to show six strain dirs."
+    },
+    {
+      "id": "s4-data-intake",
+      "instruction": "Copy the data off the pen drive: `cp /path/to/pendrive/*.fq.gz data/raw/ && cp /path/to/pendrive/md5.txt data/raw/` (substitute the real mount path)",
+      "accept": [
+        "cp /path/to/pendrive/*.fq.gz data/raw/ && cp /path/to/pendrive/md5.txt data/raw/"
+      ],
+      "output_fragment": [],
+      "silent": false,
+      "note": "The accept form is the exercises.md canonical placeholder; the student's real mount path will NOT exactly match, so expect the s6 step-(b) 'ask which command they ran' branch, and gate completion on the follow-up 'ls -lh data/raw' 12-file check. Add the real path as an accept variant once known."
+    },
+    {
+      "id": "s5-md5-verify",
+      "instruction": "Verify integrity: `cd data/raw && md5sum -c md5.txt`",
+      "accept": [
+        "cd data/raw && md5sum -c md5.txt"
+      ],
+      "output_fragment": [": OK", "OK"],
+      "silent": false,
+      "note": "Every line ending OK is the expected outcome; any FAILED routes to the TROUBLESHOOTING.md two-causes discussion, which IS the lesson - not an error branch."
+    }
+  ]
+}

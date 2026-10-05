@@ -1,0 +1,24 @@
+[workspace]
+name = "algae-wgs-l04-genomescope"
+version = "1.0.0"
+description = ""
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64"]   # workstation is linux-64 (course convention; quast boost pin blocks osx-arm64)
+
+[dependencies]
+# Every tool here was confirmed via `pixi search` during preflight (status: found in params.json).
+seqkit = "*"
+meryl = "*"
+genomescope2 = "*"
+
+# CheckM (validation) crashes on Python >=3.12 with setuptools >=81:
+# "ModuleNotFoundError: No module named 'pkg_resources'" (pkg_resources was
+# removed from setuptools in 81). Pin setuptools until checkm-genome is
+# updated upstream to not depend on pkg_resources.
+# setuptools = "<81"  # uncomment if CheckM is used (in CheckM's feature table if it is isolated)
+
+[tasks]
+# Lesson skills drive procedures in the chat/pane; a phase-executing task set would be misleading.
+# Self-check: compares this skill's git SHA to upstream (github.com/cheahhl814/algae-wgs-l04-genomescope).
+# See bin/skill-update-check.py for the verdict legend (UP-TO-DATE / BEHIND-BY-N / OFFLINE).
+update-check = "python3 ../bin/skill-update-check.py"

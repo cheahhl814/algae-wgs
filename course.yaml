@@ -1,0 +1,20 @@
+schema: herdr-lab/course.v1
+name: algal-wgs
+title: Freshwater green-algae WGS — learn-by-doing
+shell: bash
+passing_score: 0.8
+# scratch_setup: present? lessons assume ~/algal-wgs (pixi workspace) — set in setup.sh
+modules:
+  - id: phase-1
+    title: Phase 1 — environment, QC, screening, genome sizing, species ID
+    lessons:
+      - 01-setup-and-data-intake
+      - 02-read-qc
+      - 03-kraken2-screen
+      - 04-genomescope
+      - 05-marker-genes
+  - id: phase-2
+    title: Phase 2 — assembly and assembly QC
+    lessons:
+      - 06-assembly
+      - 07-assembly-qc
